@@ -1,10 +1,11 @@
-#ifndef webserver_h
+/* #ifndef webserver_h
 #define webserver_h
 
 #include <defines.h>
 #include <wifi.h>
 #include <devicehandler.h>
 #include <fanhandler.h>
+
 
 struct RequestData
 {
@@ -16,14 +17,19 @@ struct RequestData
 class Webserver
 {
 private:
-    WiFiWebServer server = WiFiWebServer(80);
-    DeviceHandler &deviceHandler;
-    FanHandler &fanHandler;
+    static WiFiWebServer server;
+    static DeviceHandler deviceHandler;
+    static FanHandler fanHandler;
+    static void begin();
+    static void handle_root();
+    static void handle_api_speed();
+    static void handle_api_device();
+    static void handle_notfound();
 
 public:
-    Webserver(DeviceHandler &devices, FanHandler &fans) : deviceHandler(devices), fanHandler(fans) {}
-    void begin();
-    void handle();
-}
+    static void handle();
+};
 
-#endif
+static void wifi_module_failed();
+
+#endif */

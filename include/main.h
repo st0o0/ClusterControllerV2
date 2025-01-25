@@ -2,10 +2,6 @@
 #define main_h
 
 #include <defines.h>
-#include <wifi.h>
-#include <helperfunction.h>
-#include <fanhandler.h>
-#include <devicehandler.h>
 
 #define fanOutput_PWM_PIN 12
 #define fanOutput_SENS_PIN 27

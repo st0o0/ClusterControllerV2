@@ -1,14 +1,7 @@
 #include <main.h>
 
-int status = WL_IDLE_STATUS;
-
 const int FAN_OFF_TEMP = 0;
 const int FAN_MAX_TEMP = 15;
-
-WiFiWebServer server(80);
-fanhandlerconfig config;
-FanHandler fanhandler(config);
-DeviceHandler devicehandler;
 
 const size_t maxTempValues = 5;
 std::map<std::string, std::vector<float>> data;
@@ -65,27 +58,7 @@ const char *get_table()
   return table.c_str();
 }
 
-void handle_notfound()
-{
-  String message = F("File Not Found\n\n");
-
-  message += F("URI: ");
-  message += server.uri();
-  message += F("\nMethod: ");
-  message += (server.method() == HTTP_GET) ? F("GET") : F("POST");
-  message += F("\nArguments: ");
-  message += server.args();
-  message += F("\n");
-
-  for (uint8_t i = 0; i < server.args(); i++)
-  {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-
-  server.send(404, F("text/plain"), message);
-}
-
-void handle_root()
+void old_root()
 {
 #define BUFFER_SIZE 8192
 
@@ -153,115 +126,81 @@ void handle_root()
     %s\
 </body>\
 </html>",
-           BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr % 24, min % 60, sec % 60, checked ? "checked='checked'" : "", setFanSpeed, setFanSpeed, fanSpeed, get_table());
+           "BOARD_NAME", "BOARD_NAME", "SHIELD_TYPE", day, hr % 24, min % 60, sec % 60, checked ? "checked='checked'" : "", setFanSpeed, setFanSpeed, fanSpeed, get_table());
 
-  server.send(200, F("text/html"), F(temp));
+  // server.send(200, F("text/html"), F(temp));
 }
 
-void handle_fanspeed()
+void old_handle_fanspeed()
 {
-  if (server.method() == HTTP_POST)
-  {
-    setFanSpeed = server.arg("speed").toInt();
-    std::string checkValue = server.arg("check").c_str();
-    checked = to_bool(checkValue);
-    server.sendHeader("Location", "/");
-    server.send(303, "");
-  }
+  // if (server.method() == HTTP_POST)
+  // {
+  //   setFanSpeed = server.arg("speed").toInt();
+  //   std::string checkValue = server.arg("check").c_str();
+  //   checked = to_bool(checkValue);
+  //   server.sendHeader("Location", "/");
+  //   server.send(303, "");
+  // }
 }
 
-void handle_temp()
+void old_handle_temp()
 {
-  if (server.method() == HTTP_POST && server.hasArg("name") && server.hasArg("temp"))
-  {
-    std::string pi = server.arg("name").c_str();
-    float temp = server.arg("temp").toFloat();
+  // if (server.method() == HTTP_POST && server.hasArg("name") && server.hasArg("temp"))
+  // {
+  //   std::string pi = server.arg("name").c_str();
+  //   float temp = server.arg("temp").toFloat();
 
-    auto it = data.find(pi);
-    if (it != data.end())
-    {
-      add_value(it->second, temp, maxTempValues);
-    }
-    else
-    {
-      std::vector<float> values;
-      add_value(values, temp, maxTempValues);
-      data[pi.c_str()] = values;
-    }
+  //   auto it = data.find(pi);
+  //   if (it != data.end())
+  //   {
+  //     add_value(it->second, temp, maxTempValues);
+  //   }
+  //   else
+  //   {
+  //     std::vector<float> values;
+  //     add_value(values, temp, maxTempValues);
+  //     data[pi.c_str()] = values;
+  //   }
 
-    server.send(200, "text/plain", "Data received successfully");
-  }
-  else
-  {
-    server.send(400, "text/plain", "Missing arguments or invalid input");
-  }
-}
-
-void fan_setup()
-{
-
-  fanhandler.begin();
-  fanhandler.setFanSpeed(10);
-}
-
-void wifi_module_failed()
-{
-}
-
-void wifi_setup()
-{
+  //   server.send(200, "text/plain", "Data received successfully");
+  // }
+  // else
+  // {
+  //   server.send(400, "text/plain", "Missing arguments or invalid input");
+  // }
 }
 
 void setup()
 {
-  fanconfig inconfig;
-  inconfig.pwmPin = fanInput_PWM_PIN;
-  inconfig.sensorPin = fanInput_SENS_PIN;
-  inconfig.sensorThreshold = fanInput_THRESHOLD;
-  fanconfig outconfig;
-  outconfig.pwmPin = fanOutput_PWM_PIN;
-  outconfig.sensorPin = fanOutput_SENS_PIN;
-  outconfig.sensorThreshold = fanOutput_THRESHOLD;
-  config.InFan = inconfig;
-  config.OutFan = outconfig;
-  fanhandler = FanHandler(config);
-  devicehandler = DeviceHandler();
+  // fanconfig inconfig;
+  // inconfig.pwmPin = fanInput_PWM_PIN;
+  // inconfig.sensorPin = fanInput_SENS_PIN;
+  // inconfig.sensorThreshold = fanInput_THRESHOLD;
+  // fanconfig outconfig;
+  // outconfig.pwmPin = fanOutput_PWM_PIN;
+  // outconfig.sensorPin = fanOutput_SENS_PIN;
+  // outconfig.sensorThreshold = fanOutput_THRESHOLD;
+  // config.InFan = inconfig;
+  // config.OutFan = outconfig;
+  // fanhandler = FanHandler(config);
+  // devicehandler = DeviceHandler();
+
+  // server.setup(devicehandler, fanhandler);
 
   Serial.begin(115200);
   delay(200);
 
-  Serial.print(F("\nStarting AdvancedWebServer on "));
-  Serial.print(BOARD_NAME);
-  Serial.print(F(" with "));
-  Serial.println(SHIELD_TYPE);
-  Serial.println(WIFI_WEBSERVER_VERSION);
-
-  wifi_setup();
-
-  fan_setup();
-
-  server.on(F("/"), handle_root);
-  server.on(F("/setfanspeed"), handle_fanspeed);
-  server.on(F("/pi"), handle_temp);
-  server.on(F("/favicon.ico"), []()
-            { server.send(404, F("text/plain"), F("")); });
-
-  server.onNotFound(handle_notfound);
-  server.begin();
+  // Serial.print(F("\nStarting AdvancedWebServer on "));
+  // Serial.print(BOARD_NAME);
+  // Serial.print(F(" with "));
+  // Serial.println(SHIELD_TYPE);
+  // Serial.println(WIFI_WEBSERVER_VERSION);
 }
 
 void loop()
 {
-  server.handleClient();
-
-  if (!checked)
+  if (Serial.available())
   {
-    // int temp = calc_temp();
-    // int speed = fan_curve(temp - 30.0);
-    // fanhandler.setFanSpeed(20);
-  }
-  else
-  {
-    fanhandler.setFanSpeed(setFanSpeed);
+    Serial.println("HALLO");
   }
 }

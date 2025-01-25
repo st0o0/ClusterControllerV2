@@ -1,4 +1,7 @@
-#include <webserver.h>
+/* #include <webserver.h>
+#include <wifi.h>
+
+WiFiWebServer Webserver::server(80);
 
 void Webserver::begin()
 {
@@ -40,37 +43,53 @@ void Webserver::begin()
         Serial.print("IP Address: ");
         Serial.println(ip);
     }
-    server.on(F("/"), handle_root);
-    server.on(F("/api/speed"), handle_api_speed);
-    server.on(F("/api/device"), handle_api_device);
-    server.on(F("/favicon.ico"), []()
-              { server.send(404, F("text/plain"), F("") });
-    server.onNotFound(handle_notfound);
-    server.begin();
+    Webserver::server.on(F("/"), handle_root);
+    Webserver::server.on(F("/api/speed"), handle_api_speed);
+    Webserver::server.on(F("/api/device"), handle_api_device);
+    Webserver::server.on(F("/favicon.ico"), []()
+              { Webserver::server.send(404, F("text/plain"), F("")); });
+    Webserver::server.onNotFound(handle_notfound);
+    Webserver::server.begin();
 }
 
 void Webserver::handle()
 {
-    server.handleClient();
+    Webserver::server.handleClient();
 }
 
-void handle_root()
+void Webserver::handle_root()
 {
 }
 
-void handle_api_speed()
+void Webserver::handle_api_speed()
 {
 }
 
-void handle_api_device()
+void Webserver::handle_api_device()
 {
 }
 
-void handle_notfound()
+void Webserver::handle_notfound()
 {
+    String message = F("File Not Found\n\n");
+
+    message += F("URI: ");
+    message += server.uri();
+    message += F("\nMethod: ");
+    message += (server.method() == HTTP_GET) ? F("GET") : F("POST");
+    message += F("\nArguments: ");
+    message += server.args();
+    message += F("\n");
+
+    for (uint8_t i = 0; i < server.args(); i++)
+    {
+        message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+    }
+
+    Webserver::server.send(404, F("text/plain"), message);
 }
 
-void wifi_module_failed()
+static void wifi_module_failed()
 {
     Serial.println();
     Serial.println(F("Communication with WiFi module failed!"));
@@ -79,4 +98,4 @@ void wifi_module_failed()
         delay(1500);
         Serial.println(F("Communication with WiFi module failed!"));
     };
-}
+} */
