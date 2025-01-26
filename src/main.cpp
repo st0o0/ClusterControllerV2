@@ -1,5 +1,7 @@
 #include <main.h>
 
+WiFiWebServer server(80);
+
 const int FAN_OFF_TEMP = 0;
 const int FAN_MAX_TEMP = 15;
 
@@ -170,6 +172,86 @@ void old_handle_temp()
   // }
 }
 
+void handle_not_found()
+{
+  String message = F("File Not Found\n\n");
+
+  message += F("URI: ");
+  message += server.uri();
+  message += F("\nMethod: ");
+  message += (server.method() == HTTP_GET) ? F("GET") : F("POST");
+  message += F("\nArguments: ");
+  message += server.args();
+  message += F("\n");
+
+  for (uint8_t i = 0; i < server.args(); i++)
+  {
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+  }
+
+  server.send(404, F("text/plain"), message);
+}
+
+void wifi_module_failed()
+{
+  Serial.println();
+  Serial.println(F("Communication with WiFi module failed!"));
+  while (true)
+  {
+    delay(1500);
+    Serial.println(F("Communication with WiFi module failed!"));
+  };
+}
+
+void webserver_setup()
+{
+  EspSerial.begin(115200);
+  WiFi.init(EspSerial);
+  if (WiFi.status() == WL_NO_MODULE)
+  {
+    wifi_module_failed();
+  }
+  WiFi.sleepMode(WIFI_NONE_SLEEP);
+  WiFi.setHostname("ClusterController");
+  WiFi.disconnect();
+  WiFi.endAP(true);
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println(F("Connecting to WiFi..."));
+    int wifiStatus = WiFi.begin(ssid, password);
+
+    if (wifiStatus == WL_CONNECTED)
+    {
+      WiFi.setAutoConnect(true);
+      Serial.println();
+      Serial.println(F("Connected to WiFi network."));
+      IPAddress ip = WiFi.localIP();
+      Serial.print("IP Address: ");
+      Serial.println(ip);
+    }
+    else
+    {
+      WiFi.disconnect();
+      Serial.println();
+      Serial.println(F("Connection to WiFi network failed."));
+    }
+  }
+  else
+  {
+    Serial.println(F("Already connected to WiFi."));
+    IPAddress ip = WiFi.localIP();
+    Serial.print("IP Address: ");
+    Serial.println(ip);
+  }
+  server.on(F("/"), []() {});
+  server.on(F("/api/speed"), []() {});
+  server.on(F("/api/device"), []() {});
+  server.on(F("/favicon.ico"), []()
+            { server.send(404, F("text/plain"), F("")); });
+  server.onNotFound(handle_not_found);
+  server.begin();
+}
+
 void setup()
 {
   // fanconfig inconfig;
@@ -189,12 +271,7 @@ void setup()
 
   Serial.begin(115200);
   delay(200);
-
-  // Serial.print(F("\nStarting AdvancedWebServer on "));
-  // Serial.print(BOARD_NAME);
-  // Serial.print(F(" with "));
-  // Serial.println(SHIELD_TYPE);
-  // Serial.println(WIFI_WEBSERVER_VERSION);
+  webserver_setup();
 }
 
 void loop()
