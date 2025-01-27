@@ -1,43 +1,44 @@
 #include <main.h>
+#include <controller.h>
+#include <fanhandler.h>
+#include <devicehandler.h>
 
 WiFiWebServer server(80);
 
-boolean checked = 0;
-
 const char *get_table()
 {
-/* 
-  std::string table;
-  table.clear();
-  table.append("<table style='width:100%'>");
-  table.append("<tr>");
-  table.append("<th scope='col'>&nbsp;</th>");
-  for (auto const &x : data)
-  {
-    table += "<th scope='col'>" + x.first + "</th>";
-  }
-  for (size_t i = 0; i < ; ++i)
-  {
-    table.append("</tr><tr>");
-    table.append("<th scope='row'>");
-    table.append(String(i).c_str());
-    table.append("</th>");
-    for (auto const &sv : data)
+  /*
+    std::string table;
+    table.clear();
+    table.append("<table style='width:100%'>");
+    table.append("<tr>");
+    table.append("<th scope='col'>&nbsp;</th>");
+    for (auto const &x : data)
     {
-      table.append("<td>");
-      if (i < sv.second.size())
-      {
-        table.append(String(sv.second.at(i)).c_str());
-      }
-      else
-      {
-        table.append("-");
-      }
-      table.append("</td>");
+      table += "<th scope='col'>" + x.first + "</th>";
     }
-  }
-  table.append("</table></br>");
-  return table.c_str(); */
+    for (size_t i = 0; i < ; ++i)
+    {
+      table.append("</tr><tr>");
+      table.append("<th scope='row'>");
+      table.append(String(i).c_str());
+      table.append("</th>");
+      for (auto const &sv : data)
+      {
+        table.append("<td>");
+        if (i < sv.second.size())
+        {
+          table.append(String(sv.second.at(i)).c_str());
+        }
+        else
+        {
+          table.append("-");
+        }
+        table.append("</td>");
+      }
+    }
+    table.append("</table></br>");
+    return table.c_str(); */
 }
 
 void old_root()
@@ -108,7 +109,7 @@ void old_root()
     %s\
 </body>\
 </html>",
-           "BOARD_NAME", "BOARD_NAME", "SHIELD_TYPE", day, hr % 24, min % 60, sec % 60, checked ? "checked='checked'" : "", 60, 50, 590, get_table());
+           "BOARD_NAME", "BOARD_NAME", "SHIELD_TYPE", day, hr % 24, min % 60, sec % 60, true ? "checked='checked'" : "", 60, 50, 590, get_table());
 
   // server.send(200, F("text/html"), F(temp));
 }
@@ -193,7 +194,7 @@ void webserver_setup()
   server.begin();
 }
 
-void setup()
+void controller_setup()
 {
   fanconfig inconfig;
   inconfig.pwmPin = fanInput_PWM_PIN;
@@ -203,22 +204,59 @@ void setup()
   outconfig.pwmPin = fanOutput_PWM_PIN;
   outconfig.sensorPin = fanOutput_SENS_PIN;
   outconfig.sensorThreshold = fanOutput_THRESHOLD;
+  fanhandlerconfig config;
   config.InFan = inconfig;
   config.OutFan = outconfig;
-  fanhandler = FanHandler(config);
-  //devicehandler = DeviceHandler();
-  controllerconfig config;
-  config.fan_off_temp = 35;
-  config.fan_max_temp = 50;
-  controller = Controller(config, fanhandler, devicehandler);
+  FanHandler fanhandler = FanHandler(config);
+  DeviceHandler devicehandler = DeviceHandler();
+  controllerconfig cconfig;
+  cconfig.fan_off_temp = 35;
+  cconfig.fan_max_temp = 50;
+  Controller ctr = Controller(cconfig, fanhandler, devicehandler);
+  ctr.begin();
+}
 
-  // server.setup(devicehandler, fanhandler);
-
+void setup()
+{
   Serial.begin(115200);
   delay(200);
+
   webserver_setup();
+  controller_setup();
+}
+
+bool checkWiFiConnection()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.println("WiFi-Verbindung verloren. Versuche erneut zu verbinden...");
+    WiFi.begin(SSID, PASS);
+
+    // Warte maximal 10 Sekunden auf eine Verbindung
+    for (int i = 0; i < 20; i++)
+    {
+      if (WiFi.status() == WL_CONNECTED)
+      {
+        Serial.println("Erfolgreich wieder verbunden!");
+        return true;
+      }
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println("Verbindung fehlgeschlagen.");
+    return false;
+  }
+  return true;
 }
 
 void loop()
 {
+  if (checkWiFiConnection())
+  {
+    server.handleClient();
+  }
+  else
+  {
+    delay(5000);
+  }
 }

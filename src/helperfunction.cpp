@@ -8,16 +8,3 @@ bool to_bool(std::string str)
   is >> std::boolalpha >> b;
   return b;
 }
-
-void add_value(std::vector<float> &vec, float value, size_t maxValues)
-{
-  if (vec.size() < maxValues)
-  {
-    vec.reserve(maxValues);
-  }
-  vec.insert(vec.begin(), value);
-  if (vec.size() > maxValues)
-  {
-    vec.resize(maxValues);
-  }
-}

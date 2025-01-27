@@ -55,3 +55,7 @@ float DeviceHandler::getAvgTemp()
         return 0;
     return result / (double)devices.size();
 }
+
+DeviceHandler::DeviceHandler()
+{
+}

@@ -21,8 +21,9 @@ private:
     int calc_fancurve(float temp);
 
 public:
-    Controller(controllerconfig &init_config, FanHandler &fans, DeviceHandler &devices) : config(init_config), fanHandler(fans), deviceHandler(devices)  {}
+    Controller(controllerconfig &init, FanHandler &fans, DeviceHandler &devices);
     void begin();
+    void handle();
 };
 
 #endif

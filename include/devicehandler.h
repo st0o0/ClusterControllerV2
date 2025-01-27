@@ -17,6 +17,7 @@ private:
     std::list<DeviceData>::iterator find(const std::string &name);
 
 public:
+    DeviceHandler();
     void add(DeviceData data);
     void addTemp(const std::string &name, float temp);
     bool exists(const std::string &name);
