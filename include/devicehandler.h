@@ -18,9 +18,9 @@ private:
 
 public:
     void add(DeviceData data);
-    void update(DeviceData data);
+    void addTemp(const std::string &name, float temp);
     bool exists(const std::string &name);
-    std::list<std::string> getDevices();
+    std::list<std::string> getDeviceNames();
     DeviceData getDeviceData(const std::string &name);
     float getAvgTemp();
 };

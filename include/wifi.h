@@ -368,7 +368,6 @@
 
 #include <defines.h>
 #include <WiFiWebServer.h>
+#include <wifi_secrets.h>
 
-char ssid[] = "YOUR-SSID";         // your network SSID (name)
-char password[] = "YOUR-PASSWORD"; // your network password
 #endif
