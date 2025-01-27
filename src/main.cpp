@@ -2,32 +2,12 @@
 
 WiFiWebServer server(80);
 
-const int FAN_OFF_TEMP = 0;
-const int FAN_MAX_TEMP = 15;
-
-const size_t maxTempValues = 5;
-std::map<std::string, std::vector<float>> data;
 boolean checked = 0;
-int setFanSpeed = 0;
-int fanSpeed = 0;
-
-int calc_temp()
-{
-  float result = 0;
-  for (auto const &x : data)
-  {
-    float acc = std::accumulate(std::begin(x.second), std::end(x.second), 0.0);
-    result = result + (acc / maxTempValues);
-  }
-
-  if (data.empty())
-    return 0;
-  return result / (double)data.size();
-}
 
 const char *get_table()
 {
-  static std::string table;
+/* 
+  std::string table;
   table.clear();
   table.append("<table style='width:100%'>");
   table.append("<tr>");
@@ -36,7 +16,7 @@ const char *get_table()
   {
     table += "<th scope='col'>" + x.first + "</th>";
   }
-  for (size_t i = 0; i < maxTempValues; ++i)
+  for (size_t i = 0; i < ; ++i)
   {
     table.append("</tr><tr>");
     table.append("<th scope='row'>");
@@ -57,7 +37,7 @@ const char *get_table()
     }
   }
   table.append("</table></br>");
-  return table.c_str();
+  return table.c_str(); */
 }
 
 void old_root()
@@ -128,48 +108,9 @@ void old_root()
     %s\
 </body>\
 </html>",
-           "BOARD_NAME", "BOARD_NAME", "SHIELD_TYPE", day, hr % 24, min % 60, sec % 60, checked ? "checked='checked'" : "", setFanSpeed, setFanSpeed, fanSpeed, get_table());
+           "BOARD_NAME", "BOARD_NAME", "SHIELD_TYPE", day, hr % 24, min % 60, sec % 60, checked ? "checked='checked'" : "", 60, 50, 590, get_table());
 
   // server.send(200, F("text/html"), F(temp));
-}
-
-void old_handle_fanspeed()
-{
-  // if (server.method() == HTTP_POST)
-  // {
-  //   setFanSpeed = server.arg("speed").toInt();
-  //   std::string checkValue = server.arg("check").c_str();
-  //   checked = to_bool(checkValue);
-  //   server.sendHeader("Location", "/");
-  //   server.send(303, "");
-  // }
-}
-
-void old_handle_temp()
-{
-  // if (server.method() == HTTP_POST && server.hasArg("name") && server.hasArg("temp"))
-  // {
-  //   std::string pi = server.arg("name").c_str();
-  //   float temp = server.arg("temp").toFloat();
-
-  //   auto it = data.find(pi);
-  //   if (it != data.end())
-  //   {
-  //     add_value(it->second, temp, maxTempValues);
-  //   }
-  //   else
-  //   {
-  //     std::vector<float> values;
-  //     add_value(values, temp, maxTempValues);
-  //     data[pi.c_str()] = values;
-  //   }
-
-  //   server.send(200, "text/plain", "Data received successfully");
-  // }
-  // else
-  // {
-  //   server.send(400, "text/plain", "Missing arguments or invalid input");
-  // }
 }
 
 void handle_not_found()
@@ -218,7 +159,7 @@ void webserver_setup()
   if (WiFi.status() != WL_CONNECTED)
   {
     Serial.println(F("Connecting to WiFi..."));
-    int wifiStatus = WiFi.begin(ssid, password);
+    int wifiStatus = WiFi.begin(SSID, PASS);
 
     if (wifiStatus == WL_CONNECTED)
     {
@@ -254,18 +195,22 @@ void webserver_setup()
 
 void setup()
 {
-  // fanconfig inconfig;
-  // inconfig.pwmPin = fanInput_PWM_PIN;
-  // inconfig.sensorPin = fanInput_SENS_PIN;
-  // inconfig.sensorThreshold = fanInput_THRESHOLD;
-  // fanconfig outconfig;
-  // outconfig.pwmPin = fanOutput_PWM_PIN;
-  // outconfig.sensorPin = fanOutput_SENS_PIN;
-  // outconfig.sensorThreshold = fanOutput_THRESHOLD;
-  // config.InFan = inconfig;
-  // config.OutFan = outconfig;
-  // fanhandler = FanHandler(config);
-  // devicehandler = DeviceHandler();
+  fanconfig inconfig;
+  inconfig.pwmPin = fanInput_PWM_PIN;
+  inconfig.sensorPin = fanInput_SENS_PIN;
+  inconfig.sensorThreshold = fanInput_THRESHOLD;
+  fanconfig outconfig;
+  outconfig.pwmPin = fanOutput_PWM_PIN;
+  outconfig.sensorPin = fanOutput_SENS_PIN;
+  outconfig.sensorThreshold = fanOutput_THRESHOLD;
+  config.InFan = inconfig;
+  config.OutFan = outconfig;
+  fanhandler = FanHandler(config);
+  //devicehandler = DeviceHandler();
+  controllerconfig config;
+  config.fan_off_temp = 35;
+  config.fan_max_temp = 50;
+  controller = Controller(config, fanhandler, devicehandler);
 
   // server.setup(devicehandler, fanhandler);
 
@@ -276,8 +221,4 @@ void setup()
 
 void loop()
 {
-  if (Serial.available())
-  {
-    Serial.println("HALLO");
-  }
 }
