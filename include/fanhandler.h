@@ -2,7 +2,7 @@
 #define fanhandler_h
 
 #include <defines.h>
-#include <FanController.h>
+#include <fancontroller.h>
 
 struct fanconfig
 {
@@ -20,9 +20,9 @@ struct fanhandlerconfig
 class FanHandler
 {
 private:
+    FanController inputFan = FanController(0, 0, 0, 0);
+    FanController outputFan = FanController(0, 0, 0, 0);
     fanhandlerconfig config;
-    FanController inputFan = FanController(0, 0, 0);
-    FanController outputFan = FanController(0, 0, 0);
 
 public:
     FanHandler(fanhandlerconfig &init_config);

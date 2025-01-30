@@ -4,11 +4,6 @@ Controller::Controller(controllerconfig &init, FanHandler &fans, DeviceHandler &
 {
 }
 
-int Controller::calc_fancurve(float temp)
-{
-    return max(0, 100 * (temp - config.fan_off_temp) / (config.fan_max_temp - config.fan_max_temp));
-}
-
 void Controller::begin()
 {
     fanHandler.begin();
@@ -19,4 +14,9 @@ void Controller::handle()
     auto avg_temp = deviceHandler.getAvgTemp();
     int calced_fanspeed = calc_fancurve(avg_temp);
     fanHandler.setFanSpeed(calced_fanspeed);
+}
+
+int Controller::calc_fancurve(float temp)
+{
+    return max((float)0, 100 * (temp - config.fan_off_temp) / (config.fan_max_temp - config.fan_off_temp));
 }

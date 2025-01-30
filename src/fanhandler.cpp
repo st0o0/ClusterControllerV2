@@ -5,13 +5,12 @@ void FanHandler::begin()
     fanconfig inFanConfig = config.InFan;
     fanconfig outFanConfig = config.OutFan;
     pinMode(inFanConfig.sensorPin, INPUT_PULLDOWN);
-    pinMode(inFanConfig.pwmPin, OUTPUT);
     pinMode(outFanConfig.sensorPin, INPUT_PULLDOWN);
+    pinMode(inFanConfig.pwmPin, OUTPUT);
     pinMode(outFanConfig.pwmPin, OUTPUT);
 
     analogWriteResolution(8);
-    analogWriteFrequency(outFanConfig.pwmPin, 25000);
-    analogWriteFrequency(inFanConfig.pwmPin, 25000);
+    analogWriteFrequency(25000);
     inputFan.begin();
     outputFan.begin();
 }
@@ -50,6 +49,6 @@ FanHandler::FanHandler(fanhandlerconfig &init_config)
     config = init_config;
     fanconfig inFanConfig = config.InFan;
     fanconfig outFanConfig = config.OutFan;
-    inputFan = FanController(inFanConfig.sensorPin, inFanConfig.sensorThreshold, inFanConfig.pwmPin);
-    outputFan = FanController(outFanConfig.sensorPin, outFanConfig.sensorThreshold, outFanConfig.pwmPin);
+    inputFan = FanController(inFanConfig.sensorPin, inFanConfig.sensorThreshold, inFanConfig.pwmPin, 0);
+    outputFan = FanController(outFanConfig.sensorPin, outFanConfig.sensorThreshold, outFanConfig.pwmPin, 1);
 }

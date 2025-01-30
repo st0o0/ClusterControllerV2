@@ -4,7 +4,6 @@
 #include <defines.h>
 #include <devicehandler.h>
 #include <fanhandler.h>
-#include <wifi.h>
 
 struct controllerconfig
 {

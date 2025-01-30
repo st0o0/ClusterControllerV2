@@ -14,5 +14,4 @@
 #include <iomanip>
 #include <algorithm>
 #include <cctype>
-#include <wifi.h>
 #endif // defines_h
