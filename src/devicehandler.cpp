@@ -1,61 +1,101 @@
-#include <devicehandler.h>
+#include "devicehandler.h"
+#include <algorithm>
+#include <numeric>
+
+DeviceHandler::DeviceHandler() {}
 
 std::list<DeviceData>::iterator DeviceHandler::find(const std::string &name)
 {
-    return std::find_if(devices.begin(), devices.end(), [&name](const DeviceData &device)
+    return std::find_if(devices.begin(), devices.end(),
+                        [&name](const DeviceData &device)
                         { return device.name == name; });
 }
 
 void DeviceHandler::add(DeviceData data)
 {
-    devices.push_back(data);
+    devices.push_back(std::move(data));
 }
 
-void DeviceHandler::addTemp(const std::string &name, float temp)
+void DeviceHandler::addOrUpdate(const std::string &name, float temperature, const std::string &timestamp)
 {
     auto it = find(name);
     if (it != devices.end())
     {
-        (*it).tempAvg.add(temp);
+        it->tempAvg.add(temperature);
+        it->lastUpdate = timestamp;
+    }
+    else
+    {
+        DeviceData newDevice{name, timestamp, Moving_Average<float_t, float_t, 5>()};
+        newDevice.tempAvg.add(temperature);
+        add(std::move(newDevice));
     }
 }
 
 bool DeviceHandler::exists(const std::string &name)
 {
-    auto it = find(name);
-    return it != devices.end();
+    return find(name) != devices.end();
 }
 
 std::list<std::string> DeviceHandler::getDeviceNames()
 {
-    std::list<std::string> result;
-    for (auto const &device : devices)
+    std::list<std::string> names;
+    for (const auto &device : devices)
     {
-        result.push_back(device.name);
+        names.push_back(device.name);
     }
-
-    return result;
+    return names;
 }
 
 DeviceData DeviceHandler::getDeviceData(const std::string &name)
 {
     auto it = find(name);
-    return *it;
+    if (it != devices.end())
+    {
+        return *it;
+    }
+
+    return DeviceData{"", "", Moving_Average<float_t, float_t, 5>()};
 }
 
 float DeviceHandler::getAvgTemp()
 {
-    float result = 0;
-    for (auto const &x : devices)
-    {
-        result = result + x.tempAvg.average;
-    }
-
     if (devices.empty())
-        return 0;
-    return result / (double)devices.size();
+    {
+        return 0.0f;
+    }
+    float sum = std::accumulate(devices.begin(), devices.end(), 0.0f,
+                                [](float acc, const DeviceData &device)
+                                {
+                                    return acc + device.tempAvg.average;
+                                });
+    return sum / devices.size();
 }
 
-DeviceHandler::DeviceHandler()
+float DeviceHandler::getMinTemp()
 {
+    if (devices.empty())
+    {
+        return std::numeric_limits<float>::quiet_NaN();
+    }
+    return std::min_element(devices.begin(), devices.end(),
+                            [](const DeviceData &a, const DeviceData &b)
+                            {
+                                return a.tempAvg.average < b.tempAvg.average;
+                            })
+        ->tempAvg.average;
+}
+
+float DeviceHandler::getMaxTemp()
+{
+    if (devices.empty())
+    {
+        return std::numeric_limits<float>::quiet_NaN();
+    }
+    return std::max_element(devices.begin(), devices.end(),
+                            [](const DeviceData &a, const DeviceData &b)
+                            {
+                                return a.tempAvg.average < b.tempAvg.average;
+                            })
+        ->tempAvg.average;
 }

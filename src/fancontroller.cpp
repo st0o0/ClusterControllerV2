@@ -38,7 +38,7 @@ unsigned int FanController::getSpeed()
     {
         detachInterrupt(_sensorInterruptPin);
         double correctionFactor = 1000.0 / elapsed;
-        _lastReading = (correctionFactor * _halfRevs / 2) * 60; // RPM Berechnung
+        _lastReading = (correctionFactor * _halfRevs / 2) * 60;
         _halfRevs = 0;
         _lastMillis = millis();
         _attachInterrupt();
@@ -58,7 +58,6 @@ byte FanController::getDutyCycle()
     return _pwmDutyCycle;
 }
 
-// ✅ Attach Interrupt mit statischen Methoden
 void FanController::_attachInterrupt()
 {
     switch (_instance)

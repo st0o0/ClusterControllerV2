@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta http-equiv="refresh" content="60" />
+  <title>ClusterControllerV3</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <header>
+    <h1>Cluster Controller Dashboard</h1>
+  </header>
+
+  <main>
+    <h3>Welcome to the Cluster Controller System</h3>
+    <p>Uptime: %DATE%</p>
+
+    <form method="post" action="/api/config">
+      <label for="autoMode">Auto Mode:
+        <input id="autoMode" type="checkbox" name="autoMode" checked="%AUTOMODE%" onchange="toggleAutoMode(this)" />
+      </label>
+
+      <div id="manualControls" style="display: none">
+        <label for="inputFan">Input Fan Speed:
+          <output id="inputFanOutput">%INPUTFAN_SPEED%</output>
+        </label>
+        <input id="inputFan" type="range" min="0" max="100" value="%INPUTFAN_SPEED%" name="inputFanSpeed"
+          oninput="inputFanOutput.value = this.value" />
+
+        <label for="outputFan">Output Fan Speed:
+          <output id="outputFanOutput">%OUTPUTFAN_SPEED%</output>
+        </label>
+        <input id="outputFan" type="range" min="0" max="100" value="%OUTPUTFAN_SPEED%" name="outputFanSpeed"
+          oninput="outputFanOutput.value = this.value" />
+      </div>
+
+      <input type="submit" value="Set Fan Speeds" />
+    </form>
+
+    <div class="speed-boxes">
+      <div class="speed-box">
+        <h4>Manual Speed</h4>
+        <p id="manualSpeed">%MANUAL_SPEED%</p>
+      </div>
+      <div class="speed-box">
+        <h4>Calculated Speed</h4>
+        <p id="calculatedSpeed">%CALCED_SPEED%</p>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h4>Temperature Legend</h4>
+      <p>Maximum Temperature: <span id="maxTemp">%MAX_TEMP% °C</span></p>
+      <p>Minimum Temperature: <span id="minTemp">%MIN_TEMP% °C</span></p>
+      <p>Average Temperature: <span id="avgTemp">%AVG_TEMP% °C</span></p>
+    </div>
+
+    <table>
+      <tr>
+        <th>&nbsp;</th>
+        <th>Person 1</th>
+        <th>Person 2</th>
+        <th>Person 3</th>
+        <th>Person 4</th>
+        <th>Person 5</th>
+      </tr>
+      <tr>
+        <th>1</th>
+        <td>Emil</td>
+        <td>Tobias</td>
+        <td>Linus</td>
+        <td>Max</td>
+        <td>Sophie</td>
+      </tr>
+      <tr>
+        <th>2</th>
+        <td>16</td>
+        <td>14</td>
+        <td>10</td>
+        <td>18</td>
+        <td>12</td>
+      </tr>
+      <tr>
+        <th>3</th>
+        <td>16</td>
+        <td>14</td>
+        <td>10</td>
+        <td>18</td>
+        <td>12</td>
+      </tr>
+      <tr>
+        <th>4</th>
+        <td>16</td>
+        <td>14</td>
+        <td>10</td>
+        <td>18</td>
+        <td>12</td>
+      </tr>
+      <tr>
+        <th>5</th>
+        <td>16</td>
+        <td>14</td>
+        <td>10</td>
+        <td>18</td>
+        <td>12</td>
+      </tr>
+    </table>
+
+    <footer>
+      <p>&copy; 2025 Cluster Control System</p>
+    </footer>
+  </main>
+
+  <script>
+    function toggleAutoMode(checkbox) {
+      const manualControls = document.getElementById("manualControls");
+      if (checkbox.checked) {
+        manualControls.style.display = "none";
+      } else {
+        manualControls.style.display = "block";
+      }
+    }
+  </script>
+
+  <script>
+    function toggleAutoMode(checkbox) {
+      const manualControls = document.getElementById("manualControls");
+      if (checkbox.checked) {
+        manualControls.style.display = "none";
+      } else {
+        manualControls.style.display = "block";
+      }
+    }
+  </script>
+</body>
+
+</html>

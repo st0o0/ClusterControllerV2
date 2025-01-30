@@ -15,15 +15,17 @@ class DeviceHandler
 private:
     std::list<DeviceData> devices;
     std::list<DeviceData>::iterator find(const std::string &name);
+    void add(DeviceData data);
 
 public:
     DeviceHandler();
-    void add(DeviceData data);
-    void addTemp(const std::string &name, float temp);
+    void addOrUpdate(const std::string &name, float temperature, const std::string &timestamp);
     bool exists(const std::string &name);
     std::list<std::string> getDeviceNames();
     DeviceData getDeviceData(const std::string &name);
     float getAvgTemp();
+    float getMinTemp();
+    float getMaxTemp();
 };
 
 #endif

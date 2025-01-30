@@ -27,7 +27,7 @@ private:
     static FanController *_instances[6];
 
     void _attachInterrupt();
-    void IRAM_ATTR _trigger();  // ✅ Jetzt korrekt
+    void IRAM_ATTR _trigger();
 
     static void IRAM_ATTR _triggerCaller(byte instance);
 
