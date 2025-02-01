@@ -32,6 +32,13 @@ void DeviceHandler::addOrUpdate(const std::string &name, float temperature, cons
     }
 }
 
+void DeviceHandler::deleteOne(const std::string &name) {
+    auto it = find(name);
+    if (it != devices.end()) {
+        devices.erase(it);
+    }
+}
+
 bool DeviceHandler::exists(const std::string &name)
 {
     return find(name) != devices.end();

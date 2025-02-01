@@ -2,13 +2,6 @@
 
 void FanHandler::begin()
 {
-    fanconfig inFanConfig = config.InFan;
-    fanconfig outFanConfig = config.OutFan;
-    pinMode(inFanConfig.sensorPin, INPUT_PULLDOWN);
-    pinMode(outFanConfig.sensorPin, INPUT_PULLDOWN);
-    pinMode(inFanConfig.pwmPin, OUTPUT);
-    pinMode(outFanConfig.pwmPin, OUTPUT);
-
     analogWriteResolution(8);
     analogWriteFrequency(25000);
     inputFan.begin();
@@ -17,18 +10,20 @@ void FanHandler::begin()
 
 uint FanHandler::getInFanSpeed()
 {
+    Serial.println("Set InputSpeed To: " + String(inputFan.getDutyCycle()));
     return inputFan.getSpeed();
 }
 
 uint FanHandler::getOutFanSpeed()
 {
+    Serial.println("Set OutputSpeed To: " + String(outputFan.getDutyCycle()));
     return outputFan.getSpeed();
 }
 
 bool FanHandler::setFanSpeed(uint value)
 {
-    outputFan.setDutyCycle(value);
     inputFan.setDutyCycle(value);
+    outputFan.setDutyCycle(value);
     return true;
 }
 

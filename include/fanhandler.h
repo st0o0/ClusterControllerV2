@@ -20,8 +20,8 @@ struct fanhandlerconfig
 class FanHandler
 {
 private:
-    FanController inputFan = FanController(0, 0, 0, 0);
-    FanController outputFan = FanController(0, 0, 0, 0);
+    FanController inputFan;
+    FanController outputFan;
     fanhandlerconfig config;
 
 public:

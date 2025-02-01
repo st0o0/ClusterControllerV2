@@ -20,6 +20,7 @@ private:
 public:
     DeviceHandler();
     void addOrUpdate(const std::string &name, float temperature, const std::string &timestamp);
+    void deleteOne(const std::string &name);
     bool exists(const std::string &name);
     std::list<std::string> getDeviceNames();
     DeviceData getDeviceData(const std::string &name);

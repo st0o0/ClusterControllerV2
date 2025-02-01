@@ -31,7 +31,7 @@ controllerconfig cconfig = {
     .fan_off_temp = 35,
     .fan_max_temp = 50};
 
-Controller ctr(cconfig, fans, devices);
+Controller ctr(&cconfig, &fans, &devices);
 AsyncWebServer server(80);
 
 String get_table()
@@ -82,9 +82,42 @@ String getDate()
   return String(date);
 }
 
+std::string deviceDataToJson(const DeviceData &data)
+{
+  std::string json = "{\n";
+  json += "  \"name\": \"" + data.name + "\",\n";
+  json += "  \"lastUpdate\": \"" + data.lastUpdate + "\",\n";
+  json += "  \"averageTemperature\": " + std::to_string(data.tempAvg.average) + "\n";
+  json += "}";
+  return json;
+}
+
+std::string deviceNameToJson(const std::list<std::string> &data)
+{
+  std::string json = "[";
+  for (auto it = data.begin(); it != data.end(); ++it)
+  {
+    json += "\"" + *it + "\"";
+    if (std::next(it) != data.end())
+    {
+      json += ",";
+    }
+  }
+  json += "]";
+  return json;
+}
+
 String root_processor(const String &var)
 {
-  if (var == "MAX_TEMP")
+  if (var == "DATE")
+  {
+    return getDate();
+  }
+  else if (var == "AVG_TEMP")
+  {
+    return String(devices.getAvgTemp());
+  }
+  else if (var == "MAX_TEMP")
   {
     return String(devices.getMaxTemp());
   }
@@ -92,8 +125,33 @@ String root_processor(const String &var)
   {
     return String(devices.getMinTemp());
   }
+  else if (var == "CHECKED")
+  {
+    if (ctr.getAutomode())
+    {
+      return String("checked='checked'");
+    }
 
-  return "Hier wuerde was schlaues stehen!";
+    return "";
+  }
+  else if (var == "SETINPUTFAN_SPEED")
+  {
+    return String(ctr.getInputFanSpeed());
+  }
+  else if (var == "SETOUTPUTFAN_SPEED")
+  {
+    return String(ctr.getOutputFanSpeed());
+  }
+  else if (var == "INPUTFAN_SPEED")
+  {
+    return String(fans.getInFanSpeed());
+  }
+  else if (var == "OUTPUTFAN_SPEED")
+  {
+    return String(fans.getOutFanSpeed());
+  }
+
+  return String();
 }
 
 void handle_post_speed(AsyncWebServerRequest *request)
@@ -112,7 +170,63 @@ void handle_post_speed(AsyncWebServerRequest *request)
 
 void handle_get_device(AsyncWebServerRequest *request)
 {
-  request->send(200);
+  auto deviceNames = devices.getDeviceNames();
+  auto json = deviceNameToJson(deviceNames).c_str();
+  request->send(200, "application/json", String(json));
+}
+
+void handle_get_one_device(AsyncWebServerRequest *request)
+{
+  if (request->hasArg("device"))
+  {
+    std::string deviceName = request->arg("device").c_str();
+    auto entry = devices.getDeviceData(deviceName);
+    auto json = deviceDataToJson(entry).c_str();
+    request->send(200, "application/json", String(json));
+    return;
+  }
+
+  request->send(404, "text/plain", "DUMM");
+}
+
+void handle_delete_one_device(AsyncWebServerRequest *request)
+{
+  if (request->hasArg("device"))
+  {
+    std::string deviceName = request->arg("device").c_str();
+    devices.deleteOne(deviceName);
+    request->send(200);
+    return;
+  }
+
+  request->send(404, "text/plain", "DUMM");
+}
+
+void handle_post_config(AsyncWebServerRequest *request)
+{
+
+  if (request->hasArg("automode"))
+  {
+    bool autoMode = request->arg("automode") == "on";
+    ctr.setAutomode(autoMode);
+  }
+  else
+  {
+    ctr.setAutomode(false);
+  }
+
+  if (request->hasArg("input_fan") && request->hasArg("output_fan"))
+  {
+    int inputFanSpeed = request->arg("input_fan").toInt();
+    int outputFanSpeed = request->arg("output_fan").toInt();
+    ctr.setFanSpeed(inputFanSpeed, outputFanSpeed);
+  }
+  else
+  {
+    request->send(404, "text/plain", "DUMM2");
+  }
+
+  request->redirect("/", 303);
 }
 
 void handle_notfound(AsyncWebServerRequest *request)
@@ -163,6 +277,11 @@ void setup()
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
             { request->send(SPIFFS, "/style.css", "text/css"); });
   server.on("/api/speed", HTTP_POST, handle_post_speed);
+  server.on("/api/speed", HTTP_GET, [](AsyncWebServerRequest *request) {});
+  server.on("/api/device", HTTP_GET, handle_get_one_device);
+  server.on("/api/device", HTTP_DELETE, handle_get_one_device);
+  server.on("/api/devices", HTTP_GET, handle_get_device);
+  server.on("/api/config", HTTP_POST, handle_post_config);
   server.onNotFound(handle_notfound);
   server.begin();
   ctr.begin();
@@ -174,5 +293,5 @@ void loop()
   delay(1000);
   digitalWrite(LED_BUILTIN, LOW);
   delay(1000);
-  // ctr.handle();
+  ctr.handle();
 }

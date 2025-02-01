@@ -7,9 +7,10 @@ class FanController
 {
 public:
     FanController(byte sensorPin, unsigned int sensorThreshold, byte pwmPin, byte pwmChannel);
+    FanController();
     void begin();
     unsigned int getSpeed();
-    void setDutyCycle(byte dutyCycle);
+    void setDutyCycle(uint dutyCycle);
     byte getDutyCycle();
 
 private:

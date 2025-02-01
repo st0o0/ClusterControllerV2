@@ -16,6 +16,10 @@ FanController::FanController(byte sensorPin, unsigned int sensorThreshold, byte 
     _lastMillis = millis();
 }
 
+FanController::FanController()
+{
+}
+
 void FanController::begin()
 {
     static byte instance = 0;
@@ -46,7 +50,7 @@ unsigned int FanController::getSpeed()
     return _lastReading;
 }
 
-void FanController::setDutyCycle(byte dutyCycle)
+void FanController::setDutyCycle(uint dutyCycle)
 {
     _pwmDutyCycle = min((int)dutyCycle, 100);
     int pwmValue = map(_pwmDutyCycle, 0, 100, 0, 255);
