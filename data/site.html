@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta http-equiv="refresh" content="60" />
+    <title>ClusterControllerV3</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>Cluster Controller Dashboard</h1>
+    </header>
+
+    <main>
+      <h3>Welcome to the Cluster Controller System</h3>
+      <p>Uptime: %DATE%</p>
+
+      <form method="post" action="/api/config">
+        <label for="automode"
+          >Auto Mode:
+          <input
+            id="automode"
+            type="checkbox"
+            name="automode"
+            %CHECKED%
+            onchange="toggleAutoMode(this)"
+          />
+        </label>
+
+        <div id="manualControls" style="display: block">
+          <label for="input_fan"
+            >Input Fan Speed:
+            <output id="inputFanOutput">%SETINPUTFAN_SPEED%</output>
+          </label>
+          <input
+            id="input_fan"
+            type="range"
+            min="0"
+            max="100"
+            value="%SETINPUTFAN_SPEED%"
+            name="input_fan"
+            oninput="inputFanOutput.value = this.value"
+          />
+
+          <label for="output_fan"
+            >Output Fan Speed:
+            <output id="outputFanOutput">%SETOUTPUTFAN_SPEED%</output>
+          </label>
+          <input
+            id="output_fan"
+            type="range"
+            min="0"
+            max="100"
+            value="%SETOUTPUTFAN_SPEED%"
+            name="output_fan"
+            oninput="outputFanOutput.value = this.value"
+          />
+        </div>
+
+        <input type="submit" value="Set Fan Speeds" />
+      </form>
+
+      <div class="speed-boxes">
+        <div class="speed-box">
+          <h4>Manual Speed</h4>
+          <p id="manualSpeed">%MANUAL_SPEED%</p>
+        </div>
+        <div class="speed-box">
+          <h4>Calculated Speed</h4>
+          <p id="calculatedSpeed">%CALCED_SPEED%</p>
+        </div>
+      </div>
+      <div class="speed-boxes">
+        <div class="speed-box">
+          <h4>InputFan Speed</h4>
+          <p id="manualSpeed">%INPUTFAN_SPEED%</p>
+        </div>
+        <div class="speed-box">
+          <h4>OutputFan Speed</h4>
+          <p id="calculatedSpeed">%OUTPUTFAN_SPEED%</p>
+        </div>
+      </div>
+
+      <div class="legend">
+        <h4>Temperature Legend</h4>
+        <p>Maximum Temperature: <span id="maxTemp">%MAX_TEMP%°C</span></p>
+        <p>Minimum Temperature: <span id="minTemp">%MIN_TEMP%°C</span></p>
+        <p>Average Temperature: <span id="avgTemp">%AVG_TEMP%°C</span></p>
+      </div>
+      %TABLE%
+      <footer>
+        <p>&copy; 2025 Cluster Control System</p>
+      </footer>
+    </main>
+  </body>
+</html>
