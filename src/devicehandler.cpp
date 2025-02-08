@@ -11,6 +11,11 @@ std::list<DeviceData>::iterator DeviceHandler::find(const std::string &name)
                         { return device.name == name; });
 }
 
+bool DeviceHandler::empty()
+{
+    return devices.empty();
+}
+
 void DeviceHandler::add(DeviceData data)
 {
     devices.push_back(std::move(data));
@@ -32,9 +37,11 @@ void DeviceHandler::addOrUpdate(const std::string &name, float temperature, cons
     }
 }
 
-void DeviceHandler::deleteOne(const std::string &name) {
+void DeviceHandler::deleteOne(const std::string &name)
+{
     auto it = find(name);
-    if (it != devices.end()) {
+    if (it != devices.end())
+    {
         devices.erase(it);
     }
 }

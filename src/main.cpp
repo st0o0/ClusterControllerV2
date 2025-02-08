@@ -36,6 +36,11 @@ AsyncWebServer server(80);
 
 String getTable()
 {
+  if(devices.empty())
+  {
+    return String();
+  }
+
   std::string table;
   table.append("<table style='width:100%; border: 1px solid black;'>\n");
   table.append("<tr>\n");

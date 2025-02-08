@@ -19,6 +19,7 @@ private:
 
 public:
     DeviceHandler();
+    bool empty();
     void addOrUpdate(const std::string &name, float temperature, const std::string &timestamp);
     void deleteOne(const std::string &name);
     bool exists(const std::string &name);
