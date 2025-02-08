@@ -78,6 +78,7 @@ float DeviceHandler::getAvgTemp()
     {
         return 0.0f;
     }
+
     float sum = std::accumulate(devices.begin(), devices.end(), 0.0f,
                                 [](float acc, const DeviceData &device)
                                 {
@@ -90,7 +91,7 @@ float DeviceHandler::getMinTemp()
 {
     if (devices.empty())
     {
-        return std::numeric_limits<float>::quiet_NaN();
+        return 0.0f;
     }
     return std::min_element(devices.begin(), devices.end(),
                             [](const DeviceData &a, const DeviceData &b)
@@ -104,7 +105,7 @@ float DeviceHandler::getMaxTemp()
 {
     if (devices.empty())
     {
-        return std::numeric_limits<float>::quiet_NaN();
+        return 0.0f;
     }
     return std::max_element(devices.begin(), devices.end(),
                             [](const DeviceData &a, const DeviceData &b)
