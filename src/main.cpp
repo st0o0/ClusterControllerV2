@@ -34,9 +34,21 @@ controllerconfig cconfig = {
 Controller ctr(&cconfig, &fans, &devices);
 AsyncWebServer server(80);
 
+const unsigned long activityTimeout = 2500;
+unsigned long lastActivityMillis = 0;
+unsigned long previousMillis = 0;
+unsigned long blinkInterval = 1000;
+int ledState = LOW;
+
+void onActivity()
+{
+  blinkInterval = 200;
+  lastActivityMillis = millis();
+}
+
 String getTable()
 {
-  if(devices.empty())
+  if (devices.empty())
   {
     return String();
   }
@@ -177,9 +189,11 @@ void handle_post_speed(AsyncWebServerRequest *request)
     std::string timestamp = request->arg("timestamp").c_str();
     devices.addOrUpdate(device, temperature, timestamp);
     request->send(202);
+    onActivity();
     return;
   }
   request->send(400);
+  onActivity();
 }
 
 void handle_get_device(AsyncWebServerRequest *request)
@@ -187,6 +201,7 @@ void handle_get_device(AsyncWebServerRequest *request)
   auto deviceNames = devices.getDeviceNames();
   auto json = deviceNameToJson(deviceNames).c_str();
   request->send(200, "application/json", String(json));
+  onActivity();
 }
 
 void handle_get_one_device(AsyncWebServerRequest *request)
@@ -197,10 +212,12 @@ void handle_get_one_device(AsyncWebServerRequest *request)
     auto entry = devices.getDeviceData(deviceName);
     auto json = deviceDataToJson(entry).c_str();
     request->send(200, "application/json", String(json));
+    onActivity();
     return;
   }
 
   request->send(404, "text/plain", "DUMM");
+  onActivity();
 }
 
 void handle_delete_one_device(AsyncWebServerRequest *request)
@@ -210,10 +227,12 @@ void handle_delete_one_device(AsyncWebServerRequest *request)
     std::string deviceName = request->arg("device").c_str();
     devices.deleteOne(deviceName);
     request->send(200);
+    onActivity();
     return;
   }
 
   request->send(404, "text/plain", "DUMM");
+  onActivity();
 }
 
 void handle_post_config(AsyncWebServerRequest *request)
@@ -241,6 +260,7 @@ void handle_post_config(AsyncWebServerRequest *request)
   }
 
   request->redirect("/", 303);
+  onActivity();
 }
 
 void handle_notfound(AsyncWebServerRequest *request)
@@ -261,6 +281,7 @@ void handle_notfound(AsyncWebServerRequest *request)
   }
 
   request->send(404, "text/plain", message);
+  onActivity();
 }
 
 void setup()
@@ -287,9 +308,13 @@ void setup()
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(SPIFFS, "/site.html", "text/html", false, root_processor); });
+            { 
+              request->send(SPIFFS, "/site.html", "text/html", false, root_processor);
+              onActivity(); });
   server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(SPIFFS, "/style.css", "text/css"); });
+            { 
+              request->send(SPIFFS, "/style.css", "text/css");
+              onActivity(); });
   server.on("/api/speed", HTTP_POST, handle_post_speed);
   server.on("/api/speed", HTTP_GET, [](AsyncWebServerRequest *request) {});
   server.on("/api/device", HTTP_GET, handle_get_one_device);
@@ -303,9 +328,18 @@ void setup()
 
 void loop()
 {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= blinkInterval)
+  {
+    previousMillis = currentMillis;
+    ledState = !ledState;
+    digitalWrite(LED_BUILTIN, ledState);
+  }
+
+  if (millis() - lastActivityMillis > activityTimeout)
+  {
+    blinkInterval = 1000;
+  }
   ctr.handle();
 }
