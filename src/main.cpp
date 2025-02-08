@@ -34,41 +34,46 @@ controllerconfig cconfig = {
 Controller ctr(&cconfig, &fans, &devices);
 AsyncWebServer server(80);
 
-String get_table()
+String getTable()
 {
-  /*
-    std::string table;
-    table.clear();
-    table.append("<table style='width:100%'>");
-    table.append("<tr>");
-    table.append("<th scope='col'>&nbsp;</th>");
-    for (auto const &x : data)
+  std::string table;
+  table.append("<table style='width:100%; border: 1px solid black;'>\n");
+  table.append("<tr>\n");
+  table.append("<th scope='col'>Index</th>\n");
+  table.append("<th scope='col'>Device Name</th>\n");
+  table.append("<th scope='col'>Last Update</th>\n");
+  for (std::size_t i = 0; i < 5; ++i)
+  {
+    table.append("<th scope='col'>Value " + std::to_string(i + 1) + "</th>\n");
+  }
+
+  table.append("<th scope='col'>Average</th>\n");
+  table.append("</tr>\n");
+  int rowIndex = 1;
+  for (const auto &name : devices.getDeviceNames())
+  {
+    table.append("<tr>\n");
+    table.append("<td>" + std::to_string(rowIndex) + "</td>\n");
+    table.append("<td>" + name + "</td>\n");
+    DeviceData deviceData = devices.getDeviceData(name);
+    table.append("<td>" + deviceData.lastUpdate + "</td>\n");
+    for (std::size_t i = 0; i < 5; ++i)
     {
-      table += "<th scope='col'>" + x.first + "</th>";
+      std::ostringstream valueStream;
+      valueStream.precision(2);
+      valueStream << std::fixed << deviceData.tempAvg.values[i];
+      table.append("<td>" + valueStream.str() + "</td>\n");
     }
-    for (size_t i = 0; i < ; ++i)
-    {
-      table.append("</tr><tr>");
-      table.append("<th scope='row'>");
-      table.append(String(i).c_str());
-      table.append("</th>");
-      for (auto const &sv : data)
-      {
-        table.append("<td>");
-        if (i < sv.second.size())
-        {
-          table.append(String(sv.second.at(i)).c_str());
-        }
-        else
-        {
-          table.append("-");
-        }
-        table.append("</td>");
-      }
-    }
-    table.append("</table></br>");
-    return table.c_str(); */
-  return String();
+    std::ostringstream avgStream;
+    avgStream.precision(2);
+    avgStream << std::fixed << deviceData.tempAvg.average;
+    table.append("<td>" + avgStream.str() + "</td>\n");
+
+    table.append("</tr>\n");
+    rowIndex++;
+  }
+  table.append("</table><br>\n");
+  return String(table.c_str());
 }
 
 String getDate()
@@ -82,17 +87,17 @@ String getDate()
   return String(date);
 }
 
-std::string deviceDataToJson(const DeviceData &data)
+String deviceDataToJson(const DeviceData &data)
 {
   std::string json = "{\n";
   json += "  \"name\": \"" + data.name + "\",\n";
   json += "  \"lastUpdate\": \"" + data.lastUpdate + "\",\n";
   json += "  \"averageTemperature\": " + std::to_string(data.tempAvg.average) + "\n";
   json += "}";
-  return json;
+  return String(json.c_str());
 }
 
-std::string deviceNameToJson(const std::list<std::string> &data)
+String deviceNameToJson(const std::list<std::string> &data)
 {
   std::string json = "[";
   for (auto it = data.begin(); it != data.end(); ++it)
@@ -104,7 +109,7 @@ std::string deviceNameToJson(const std::list<std::string> &data)
     }
   }
   json += "]";
-  return json;
+  return String(json.c_str());
 }
 
 String root_processor(const String &var)
@@ -112,6 +117,10 @@ String root_processor(const String &var)
   if (var == "DATE")
   {
     return getDate();
+  }
+  else if (var == "TABLE")
+  {
+    return getTable();
   }
   else if (var == "AVG_TEMP")
   {
