@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
   <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <meta http-equiv="refresh" content="60" />
     <title>ClusterControllerV3</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
@@ -63,10 +63,6 @@
 
       <div class="speed-boxes">
         <div class="speed-box">
-          <h4>Manual Speed</h4>
-          <p id="manualSpeed">%MANUAL_SPEED%</p>
-        </div>
-        <div class="speed-box">
           <h4>Calculated Speed</h4>
           <p id="calculatedSpeed">%CALCED_SPEED%</p>
         </div>
@@ -94,4 +90,23 @@
       </footer>
     </main>
   </body>
+  <script type="text/javascript">
+    function deleteDevice(name) {
+      fetch("/api/device?name=" + encodeURIComponent(name), {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (response.ok) {
+            alert(name + " was deleted successfully!");
+            location.reload();
+          } else {
+            alert("Failed to delete " + name);
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting device:", error);
+          alert("An error occurred.");
+        });
+    }
+  </script>
 </html>

@@ -27,6 +27,7 @@ public:
     Controller(controllerconfig *init, FanHandler *fans, DeviceHandler *devices);
     void begin();
     void handle();
+    int getCalcedSpeed();
     int getOutputFanSpeed();
     int getInputFanSpeed();
     void setFanSpeed(int inputFan, int outputFan);

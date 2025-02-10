@@ -65,6 +65,7 @@ String getTable()
   }
 
   table.append("<th scope='col'>Average</th>\n");
+  table.append("<th>Actions</th>");
   table.append("</tr>\n");
   int rowIndex = 1;
   for (const auto &name : devices.getDeviceNames())
@@ -85,7 +86,7 @@ String getTable()
     avgStream.precision(2);
     avgStream << std::fixed << deviceData.tempAvg.average;
     table.append("<td>" + avgStream.str() + "</td>\n");
-
+    table.append("<td><button onclick=\"deleteDevice('" + name + "')\">Delete</button></td>");
     table.append("</tr>\n");
     rowIndex++;
   }
@@ -176,6 +177,10 @@ String root_processor(const String &var)
   {
     return String(fans.getOutFanSpeed());
   }
+  else if (var == "CALCED_SPEED")
+  {
+    return String(ctr.getCalcedSpeed());
+  }
 
   return String();
 }
@@ -196,42 +201,25 @@ void handle_post_speed(AsyncWebServerRequest *request)
   onActivity();
 }
 
-void handle_get_device(AsyncWebServerRequest *request)
-{
-  auto deviceNames = devices.getDeviceNames();
-  auto json = deviceNameToJson(deviceNames).c_str();
-  request->send(200, "application/json", String(json));
-  onActivity();
-}
-
-void handle_get_one_device(AsyncWebServerRequest *request)
-{
-  if (request->hasArg("device"))
-  {
-    std::string deviceName = request->arg("device").c_str();
-    auto entry = devices.getDeviceData(deviceName);
-    auto json = deviceDataToJson(entry).c_str();
-    request->send(200, "application/json", String(json));
-    onActivity();
-    return;
-  }
-
-  request->send(404, "text/plain", "DUMM");
-  onActivity();
-}
-
 void handle_delete_one_device(AsyncWebServerRequest *request)
 {
-  if (request->hasArg("device"))
+  if (!request->hasArg("name"))
   {
-    std::string deviceName = request->arg("device").c_str();
-    devices.deleteOne(deviceName);
-    request->send(200);
+    request->send(400, "text/plain", "Device name missing");
     onActivity();
     return;
   }
 
-  request->send(404, "text/plain", "DUMM");
+  String deviceName = request->arg("name");
+  if (devices.exists(deviceName.c_str()))
+  {
+    devices.deleteOne(deviceName.c_str());
+    request->send(200, "text/plain", "Device deleted");
+  }
+  else
+  {
+    request->send(404, "text/plain", "Device not found");
+  }
   onActivity();
 }
 
@@ -316,10 +304,7 @@ void setup()
               request->send(SPIFFS, "/style.css", "text/css");
               onActivity(); });
   server.on("/api/speed", HTTP_POST, handle_post_speed);
-  server.on("/api/speed", HTTP_GET, [](AsyncWebServerRequest *request) {});
-  server.on("/api/device", HTTP_GET, handle_get_one_device);
-  server.on("/api/device", HTTP_DELETE, handle_get_one_device);
-  server.on("/api/devices", HTTP_GET, handle_get_device);
+  server.on("/api/device", HTTP_DELETE, handle_delete_one_device);
   server.on("/api/config", HTTP_POST, handle_post_config);
   server.onNotFound(handle_notfound);
   server.begin();

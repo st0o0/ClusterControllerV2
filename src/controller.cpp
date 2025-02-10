@@ -11,13 +11,19 @@ void Controller::begin()
 
 void Controller::handle()
 {
+    auto avg_temp = deviceHandler->getAvgTemp();
+    calced_speed = calc_fancurve(avg_temp);
     if (automode)
     {
-        auto avg_temp = deviceHandler->getAvgTemp();
-        calced_speed = calc_fancurve(avg_temp);
+
         fanHandler->setInFanSpeed((calced_speed * 0.1) + calced_speed);
         fanHandler->setOutFanSpeed(calced_speed);
     }
+}
+
+int Controller::getCalcedSpeed()
+{
+    return calced_speed;
 }
 
 bool Controller::getAutomode()
